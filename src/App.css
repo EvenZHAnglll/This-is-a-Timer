@@ -14,3 +14,10 @@
 .logo.glasses:hover {
   filter: drop-shadow(0 0 2em #f6f6f6);
 }
+
+.App {
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+  padding-top: 40px;
+}

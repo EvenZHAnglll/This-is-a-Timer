@@ -38,8 +38,8 @@
         "fullscreen": false,
         "resizable": true,
         "title": "Take A Break",
-        "width": 800,
-        "height": 400
+        "width": 500,
+        "height": 800
       }
     ]
   }
