@@ -6,14 +6,6 @@ import "./App.css";
 import glassesLogo from "./assets/Glasses.svg";
 
 
-const getTimeSeconds = (time: number) => (60 - time) | 0;
-
-const minuteSeconds = 60;
-const timerProps = {
-  isPlaying: true,
-  size: 220,
-  strokeWidth: 42
-};
 
 function App() {
   const [count, setCount] = useState(0);
@@ -34,11 +26,16 @@ function App() {
     };
   }, []);
 
+  const [reset, setReset] = useState(false);
 
-  const stratTime = Date.now() / 1000; // use UNIX timestamp in seconds
-  const endTime = stratTime + 243248; // use UNIX timestamp in seconds
+  const handleReset = () => {
+    setReset(true);
+    setTimeout(() => {
+      setReset(false);
+    }, 100);
+  };
 
-  const remainingTime = endTime - stratTime;
+
 
   return (
     <div className="container">
@@ -46,34 +43,32 @@ function App() {
 
       <div className="row">
         <img src={glassesLogo} className="logo glasses" alt="glasses logo"></img>
-
-
       </div>
+
       <div className="App">
         <CountdownCircleTimer
-          {...timerProps}
+          key={reset.toString()} // 重要：当 reset 状态变化时，通过改变 key 来重置倒计时圆盘
+          isPlaying={!reset}
+          duration={10}
           colors={"#6e805f"}
-          duration={minuteSeconds}
-          initialRemainingTime={4 % minuteSeconds}
-          onComplete={(totalElapsedTime) => ({
-            shouldRepeat: remainingTime - totalElapsedTime > 0
-          })}
+          onComplete={() => console.log("倒计时完成")}
         >
-          {({ elapsedTime, color }) => (
-            <span style={{fontSize:24}}>
-              {count}/{getTimeSeconds(elapsedTime)}
-            </span>
+          {({ remainingTime }) => (
+            <div>
+              <div>{remainingTime}</div>
+              <div>秒</div>
+            </div>
           )}
         </CountdownCircleTimer>
+
       </div>
+      
+      <button onClick={handleReset}>重置倒计时</button>
+
       <div className="App">
-
-
         <p>Close your eyes, rest for 30 seconds, and relax.</p>
-        
-
-
       </div>
+
     </div>
   );
 }
