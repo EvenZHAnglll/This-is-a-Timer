@@ -27,6 +27,7 @@ function App() {
   }, []);
 
   const [reset, setReset] = useState(false);
+  const [remainingTime, setRemainingTime] = useState(0);
 
   const handleReset = () => {
     setReset(true);
@@ -49,21 +50,29 @@ function App() {
         <CountdownCircleTimer
           key={reset.toString()} // 重要：当 reset 状态变化时，通过改变 key 来重置倒计时圆盘
           isPlaying={!reset}
-          duration={10}
+          duration={60 * 60}
+          initialRemainingTime={60*50}
+          size={240}
+          strokeWidth={90}
+          trailStrokeWidth={120}
+          strokeLinecap={"butt"}
+          rotation={"counterclockwise"}
           colors={"#6e805f"}
           onComplete={() => console.log("倒计时完成")}
+          onUpdate={(remainingTime) => setRemainingTime(remainingTime)}
         >
-          {({ remainingTime }) => (
-            <div>
-              <div>{remainingTime}</div>
-              <div>秒</div>
-            </div>
-          )}
+          {() => (<div />)}
         </CountdownCircleTimer>
+      </div >
 
+      <div style={{ paddingTop: "30px" }}>
+        <div>
+        {Math.floor(remainingTime / 60)}:{remainingTime % 60 < 10 ? `0${remainingTime % 60}` : remainingTime % 60}
+        </div>
+        <button onClick={handleReset}>
+          重置倒计时
+        </button>
       </div>
-      
-      <button onClick={handleReset}>重置倒计时</button>
 
       <div className="App">
         <p>Close your eyes, rest for 30 seconds, and relax.</p>
