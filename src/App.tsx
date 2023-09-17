@@ -8,23 +8,6 @@ import glassesLogo from "./assets/Glasses.svg";
 
 
 function App() {
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCount(prevCount => {
-        if (prevCount >= 20) {
-          return 0; // 清空计数器
-        } else {
-          return prevCount + 1; // 递增计数器
-        }
-      });
-    }, 1000);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
 
   const [reset, setReset] = useState(false);
   const [remainingTime, setRemainingTime] = useState(0);
@@ -36,7 +19,14 @@ function App() {
     }, 100);
   };
 
-
+  const dotNewTranslate = (progress: number) => {
+    const angle = progress * 2 * Math.PI-Math.PI/2;
+    const radius = 105;
+    const x = radius * Math.cos(angle);
+    const y = radius * Math.sin(angle);
+    const newTranslate = `translate(${x}px, ${y}px)`
+    return newTranslate
+  }
 
   return (
     <div className="container">
@@ -50,8 +40,8 @@ function App() {
         <CountdownCircleTimer
           key={reset.toString()} // 重要：当 reset 状态变化时，通过改变 key 来重置倒计时圆盘
           isPlaying={!reset}
-          duration={60 * 60}
-          initialRemainingTime={60*50}
+          duration={60}
+          initialRemainingTime={50}
           size={240}
           strokeWidth={90}
           trailStrokeWidth={120}
@@ -59,20 +49,40 @@ function App() {
           rotation={"counterclockwise"}
           colors={"#6e805f"}
           onComplete={() => console.log("倒计时完成")}
-          onUpdate={(remainingTime) => setRemainingTime(remainingTime)}
+          onUpdate={(remainingTimeOnUpdate) => {
+            setRemainingTime(remainingTimeOnUpdate);
+          }}
         >
-          {() => (<div />)}
+          {({ remainingTime }) => (
+            <div
+              id="dot"
+              style={{
+                position: "relative",
+                width: "25px",
+                height: "25px",
+                borderRadius: "50%",
+                background: "#6e805f",
+                zIndex: "1",
+                transform: dotNewTranslate((remainingTime-1) / 60),
+                transition: "transform 1s linear",
+              }}
+            />
+          )}
+
+
         </CountdownCircleTimer>
       </div >
 
       <div style={{ paddingTop: "30px" }}>
         <div>
-        {Math.floor(remainingTime / 60)}:{remainingTime % 60 < 10 ? `0${remainingTime % 60}` : remainingTime % 60}
+          {Math.floor(remainingTime / 60)}:{remainingTime % 60 < 10 ? `0${remainingTime % 60}` : remainingTime % 60}
         </div>
         <button onClick={handleReset}>
           重置倒计时
         </button>
       </div>
+
+
 
       <div className="App">
         <p>Close your eyes, rest for 30 seconds, and relax.</p>
