@@ -14,8 +14,8 @@ function App() {
 
   const [reset, setReset] = useState(false);
   const [remainingTimeState, setRemainingTimeState] = useState(0);
-  const [duration, setDuration] = useState(60);
-  const [initialRemainingTime, setInitialRemainingTime] = useState(50);
+  const [duration, setDuration] = useState(60*60);
+  const [initialRemainingTime, setInitialRemainingTime] = useState(0);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [relativePosition, setRelativePosition] = useState({ x: 0, y: 0 });
@@ -50,7 +50,7 @@ function App() {
     const y = event.clientY - divCenterY;
     setRelativePosition({ x, y });
     const MouseAngle = Math.atan2(x,y);
-    const targetTime = (-30/Math.PI)*MouseAngle+30;
+    const targetTime = ((-30/Math.PI)*MouseAngle+30)*60;
     setInitialRemainingTime(targetTime);
     handleReset();
     console.log(targetTime);
@@ -65,7 +65,7 @@ function App() {
   };
 
   const getTransformStyleString = () => {
-    const progress = (remainingTimeState - 1) / 60
+    const progress = (remainingTimeState - 1) / duration;
     const angle = Math.max(0, progress) * 360;
     const newTranslate = `rotate(${angle}deg)`;
     // console.log("angle:",angle);
