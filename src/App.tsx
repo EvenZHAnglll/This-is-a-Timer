@@ -14,19 +14,19 @@ function App() {
 
   const [reset, setReset] = useState(false);
   const [remainingTimeState, setRemainingTimeState] = useState(0);
-  const [duration, setDuration] = useState(60*60);
+  const [duration, setDuration] = useState(60 * 60);
   const [initialRemainingTime, setInitialRemainingTime] = useState(0);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [relativePosition, setRelativePosition] = useState({ x: 0, y: 0 });
-  const [isPlaying,setIsPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const handleReset = () => {
     setReset(true);
     console.log("reset the timer.")
     setTimeout(() => {
       setReset(false);
-    }, 100);
+    }, 20);
   };
 
   const handleMouseDown = (event: any) => {
@@ -40,36 +40,37 @@ function App() {
 
   const handleMouseMove = (event: any) => {
     const targetDiv = document.getElementById("rotater");
-    if (!targetDiv) {
-      return;
-    }
+    if (!targetDiv) { return; }
     const divRect = targetDiv.getBoundingClientRect();
     const divCenterX = divRect.left + divRect.width / 2;
     const divCenterY = divRect.top + divRect.height / 2;
     const x = event.clientX - divCenterX;
     const y = event.clientY - divCenterY;
     setRelativePosition({ x, y });
-    const MouseAngle = Math.atan2(x,y);
-    const targetTime = ((-30/Math.PI)*MouseAngle+30)*60;
+    const MouseAngle = Math.atan2(x, y);
+    const targetTime = ((-30 / Math.PI) * MouseAngle + 30) * 60;
     setInitialRemainingTime(targetTime);
     handleReset();
     console.log(targetTime);
   };
 
   const handleMouseUp = (event: any) => {
+    event.preventDefault();
     document.removeEventListener("mousemove", handleMouseMove);
     document.removeEventListener("mouseup", handleMouseUp);
     setIsPlaying(true);
     handleReset();
-    console.log("MouseUp");
   };
 
   const getTransformStyleString = () => {
     const progress = (remainingTimeState - 1) / duration;
     const angle = Math.max(0, progress) * 360;
     const newTranslate = `rotate(${angle}deg)`;
-    // console.log("angle:",angle);
     return newTranslate
+  }
+
+  const getHandColor = () => {
+    return "#6e6050"
   }
 
   return (
@@ -98,54 +99,38 @@ function App() {
             console.log("remainingTime:", remainingTimeState);
           }}
         >
-          {({ remainingTime }) => {
-
+          {() => {
             return (
-              <div
-                id="rotater"
+              <div id="rotater"
                 style={{
-                  position: "relative",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
                   transform: getTransformStyleString(),
                   transition: "transform 1s linear",
-                  backgroundColor: "rgba(9,9,9,0.0)",
                 }}>
-                <div
-                  id="dot"
+                <div id="dot"
                   style={{
                     position: "relative",
                     width: "20px",
                     height: "25px",
                     bottom: "100px",
                     borderRadius: "10px 10px 3px 3px",
-                    background: "#6e6050",
-                    zIndex: "1",
+                    background: getHandColor(),
                   }}
-                  // Mouse interaction events
                   onMouseDown={handleMouseDown}
                 >
-                  <div
-                    id="hand"
+                  <div id="hand"
                     style={{
                       position: "relative",
                       width: "5px",
                       height: "105px",
                       left: "7px",
                       borderRadius: "5px",
-                      background: "#6e6050",
-                      zIndex: "1",
+                      background: getHandColor(),
                     }}
                   />
-                  {/* {remainingTime} */}
-                  {/* for testing to show the remainingTimeNumber */}
                 </div>
               </div>
             )
           }}
-
-
         </CountdownCircleTimer>
       </div >
 
@@ -158,21 +143,6 @@ function App() {
         </button>
       </div>
 
-
-
-      <div className="App">
-        {/* <p>Close your eyes, rest for 30 seconds, and relax.</p> */}
-      </div>
-
-      <div
-        className="drag-box"
-        onMouseDown={handleMouseDown}
-        style={{
-          backgroundColor: "#000000"
-        }}
-      >
-        <p>Mouse position: {relativePosition.x}, {relativePosition.y}</p>
-      </div>
     </div >
   );
 }
