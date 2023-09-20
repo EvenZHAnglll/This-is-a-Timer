@@ -20,6 +20,7 @@ function App() {
   const [isDragging, setIsDragging] = useState(false);
   const [relativePosition, setRelativePosition] = useState({ x: 0, y: 0 });
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isComplete, setIsComplete] = useState(false);
 
   const handleReset = () => {
     setReset(true);
@@ -66,20 +67,48 @@ function App() {
     const progress = (remainingTimeState - 1) / duration;
     const angle = Math.max(0, progress) * 360;
     const newTranslate = `rotate(${angle}deg)`;
-    return newTranslate
+    return newTranslate;
   }
 
   const getHandColor = () => {
-    return "#6e6050"
+    // return "#6e6050"
+    return "#6e705f";
+  }
+
+  const handleOnComplete = () => {
+
+    console.log("倒计时完成");
+    setIsComplete(true);
+
+    if (Notification.permission === 'granted') {
+      // 如果通知权限已授予
+      new Notification('系统通知', {
+        body: '倒计时完成！'
+      });
+    } else if (Notification.permission !== 'denied') {
+      // 如果通知权限尚未确定
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          new Notification('系统通知', {
+            body: '倒计时完成！'
+          });
+        }
+      });
+    }
+  }
+
+  const handleOnUpdate = (remainingTimeOnUpdate: number) => {
+    setIsComplete(false);
+    setRemainingTimeState(remainingTimeOnUpdate);
+    console.log("remainingTime:", remainingTimeState);
   }
 
   return (
     <div className="container">
-      <h1>Close your eyes!</h1>
+      <h1>
+        {isComplete ? "Take A Break." : "Focus Time."}
+      </h1>
 
-      <div className="row">
-        <img src={glassesLogo} className="logo glasses" alt="glasses logo"></img>
-      </div>
 
       <div className="App">
         <CountdownCircleTimer
@@ -93,11 +122,8 @@ function App() {
           strokeLinecap={"butt"}
           rotation={"counterclockwise"}
           colors={"#6e805f"}
-          onComplete={() => console.log("倒计时完成")}
-          onUpdate={(remainingTimeOnUpdate) => {
-            setRemainingTimeState(remainingTimeOnUpdate);
-            console.log("remainingTime:", remainingTimeState);
-          }}
+          onComplete={handleOnComplete}
+          onUpdate={handleOnUpdate}
         >
           {() => {
             return (
@@ -109,7 +135,7 @@ function App() {
                 <div id="dot"
                   style={{
                     position: "relative",
-                    width: "20px",
+                    width: "10px",
                     height: "25px",
                     bottom: "100px",
                     borderRadius: "10px 10px 3px 3px",
@@ -120,9 +146,9 @@ function App() {
                   <div id="hand"
                     style={{
                       position: "relative",
-                      width: "5px",
+                      width: "4px",
                       height: "105px",
-                      left: "7px",
+                      left: "3px",
                       borderRadius: "5px",
                       background: getHandColor(),
                     }}
@@ -132,15 +158,12 @@ function App() {
             )
           }}
         </CountdownCircleTimer>
-      </div >
+      </div > 
 
       <div style={{ paddingTop: "30px" }}>
-        <div>
+        <div style={{ fontSize: "24px", fontWeight: "bold" }}>
           {Math.floor(remainingTimeState / 60)}:{remainingTimeState % 60 < 10 ? `0${remainingTimeState % 60}` : remainingTimeState % 60}
         </div>
-        <button onClick={handleReset}>
-          重置倒计时
-        </button>
       </div>
 
     </div >

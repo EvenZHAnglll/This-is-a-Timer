@@ -16,6 +16,9 @@
       "shell": {
         "all": false,
         "open": true
+      },
+      "notification": {
+        "all": true 
       }
     },
     "bundle": {
@@ -38,8 +41,8 @@
         "fullscreen": false,
         "resizable": true,
         "title": "Take A Break",
-        "width": 500,
-        "height": 800
+        "width": 400,
+        "height": 500
       }
     ]
   }
