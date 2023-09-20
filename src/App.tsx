@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 // import { invoke } from "@tauri-apps/api/tauri";
 import { CountdownCircleTimer } from 'react-countdown-circle-timer';
 // Documentation of react-countdown-circle-timer 
@@ -6,7 +6,7 @@ import { CountdownCircleTimer } from 'react-countdown-circle-timer';
 
 
 import "./App.css";
-import glassesLogo from "./assets/Glasses.svg";
+//import glassesLogo from "./assets/Glasses.svg";
 
 
 
@@ -14,10 +14,10 @@ function App() {
 
   const [reset, setReset] = useState(false);
   const [remainingTimeState, setRemainingTimeState] = useState(0);
-  const [duration, setDuration] = useState(60 * 60);
+  const [duration] = useState(60 * 60);
   const [initialRemainingTime, setInitialRemainingTime] = useState(0);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
+  //const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  //const [isDragging, setIsDragging] = useState(false);
   const [relativePosition, setRelativePosition] = useState({ x: 0, y: 0 });
   const [isPlaying, setIsPlaying] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
@@ -48,6 +48,7 @@ function App() {
     const x = event.clientX - divCenterX;
     const y = event.clientY - divCenterY;
     setRelativePosition({ x, y });
+    console.log(relativePosition);
     const MouseAngle = Math.atan2(x, y);
     const targetTime = ((-30 / Math.PI) * MouseAngle + 30) * 60;
     setInitialRemainingTime(targetTime);
@@ -158,7 +159,7 @@ function App() {
             )
           }}
         </CountdownCircleTimer>
-      </div > 
+      </div >
 
       <div style={{ paddingTop: "30px" }}>
         <div style={{ fontSize: "24px", fontWeight: "bold" }}>
