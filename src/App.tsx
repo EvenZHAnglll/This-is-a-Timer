@@ -9,6 +9,19 @@ import "./App.css";
 //import glassesLogo from "./assets/Glasses.svg";
 
 
+let targetDiv: DOMRect | null = null;
+
+function getTargetDiv(): DOMRect | null {
+  if (targetDiv === null) {
+    const targetDivElement = document.getElementById("rotater"); // 这些操作可以存到变量
+    if (!targetDivElement) { return null; }
+    targetDiv = targetDivElement.getBoundingClientRect();
+    return targetDiv;
+  } else {
+    return targetDiv;
+  }
+};
+
 
 function App() {
 
@@ -17,8 +30,7 @@ function App() {
   const [duration] = useState(60 * 60);
   const [initialRemainingTime, setInitialRemainingTime] = useState(0);
   //const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  //const [isDragging, setIsDragging] = useState(false);
-  const [relativePosition, setRelativePosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
 
@@ -32,6 +44,7 @@ function App() {
 
   const handleMouseDown = (event: any) => {
     event.preventDefault();
+    setIsDragging(true);
     console.log("handleMouseDown")
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
@@ -40,15 +53,12 @@ function App() {
   };
 
   const handleMouseMove = (event: any) => {
-    const targetDiv = document.getElementById("rotater");
-    if (!targetDiv) { return; }
-    const divRect = targetDiv.getBoundingClientRect();
+    const divRect = getTargetDiv();
+    if (divRect === null) { return; }
     const divCenterX = divRect.left + divRect.width / 2;
     const divCenterY = divRect.top + divRect.height / 2;
     const x = event.clientX - divCenterX;
     const y = event.clientY - divCenterY;
-    setRelativePosition({ x, y });
-    console.log(relativePosition);
     const MouseAngle = Math.atan2(x, y);
     const targetTime = ((-30 / Math.PI) * MouseAngle + 30) * 60;
     setInitialRemainingTime(targetTime);
@@ -58,6 +68,7 @@ function App() {
 
   const handleMouseUp = (event: any) => {
     event.preventDefault();
+    setIsDragging(false);
     document.removeEventListener("mousemove", handleMouseMove);
     document.removeEventListener("mouseup", handleMouseUp);
     setIsPlaying(true);
