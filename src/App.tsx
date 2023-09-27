@@ -8,17 +8,26 @@ import { CountdownCircleTimer } from 'react-countdown-circle-timer';
 import "./App.css";
 //import glassesLogo from "./assets/Glasses.svg";
 
+interface Vector2 {
+  x: number;
+  y: number;
+};
 
-let targetDiv: DOMRect | null = null;
+let targetDivPosition: Vector2 | null = null;
 
-function getTargetDiv(): DOMRect | null {
-  if (targetDiv === null) {
-    const targetDivElement = document.getElementById("rotater"); // 这些操作可以存到变量
+function getTargetDivPosition(): Vector2 | null {
+  if (targetDivPosition === null) {
+    const targetDivElement = document.getElementById("rotater");
     if (!targetDivElement) { return null; }
-    targetDiv = targetDivElement.getBoundingClientRect();
-    return targetDiv;
+    const targetDiv = targetDivElement.getBoundingClientRect();
+    if (targetDiv === null) { return null; }
+    targetDivPosition = {
+      x: targetDiv.left + targetDiv.width / 2,
+      y: targetDiv.top + targetDiv.height / 2
+    }
+    return targetDivPosition;
   } else {
-    return targetDiv;
+    return targetDivPosition;
   }
 };
 
@@ -29,7 +38,6 @@ function App() {
   const [remainingTimeState, setRemainingTimeState] = useState(0);
   const [duration] = useState(60 * 60);
   const [initialRemainingTime, setInitialRemainingTime] = useState(0);
-  //const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
@@ -45,22 +53,18 @@ function App() {
   const handleMouseDown = (event: any) => {
     event.preventDefault();
     setIsDragging(true);
-    console.log("handleMouseDown")
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
     setIsPlaying(false);
-    handleReset();
   };
 
   const handleMouseMove = (event: any) => {
-    const divRect = getTargetDiv();
-    if (divRect === null) { return; }
-    const divCenterX = divRect.left + divRect.width / 2;
-    const divCenterY = divRect.top + divRect.height / 2;
-    const x = event.clientX - divCenterX;
-    const y = event.clientY - divCenterY;
+    const divRectPosition = getTargetDivPosition();
+    if (divRectPosition === null) { return; }
+    const x = event.clientX - divRectPosition.x;
+    const y = event.clientY - divRectPosition.y;
     const MouseAngle = Math.atan2(x, y);
-    const targetTime = ((-30 / Math.PI) * MouseAngle + 30) * 60;
+    const targetTime = ((-30 / Math.PI) * MouseAngle + 30) * 60;// 这个60要换成 duration
     setInitialRemainingTime(targetTime);
     handleReset();
     console.log(targetTime);
@@ -112,13 +116,12 @@ function App() {
   const handleOnUpdate = (remainingTimeOnUpdate: number) => {
     setIsComplete(false);
     setRemainingTimeState(remainingTimeOnUpdate);
-    console.log("remainingTime:", remainingTimeState);
   }
 
   return (
     <div className="container">
       <h1>
-        {isComplete ? "Take A Break." : "Focus Time."}
+        It's a Timer.
       </h1>
 
 
