@@ -40,7 +40,7 @@ function App() {
   const [initialRemainingTime, setInitialRemainingTime] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isComplete, setIsComplete] = useState(false);
+  const [isComplete, setIsComplete] = useState(true);
 
   const handleReset = () => {
     setReset(true);
@@ -77,6 +77,7 @@ function App() {
     document.removeEventListener("mouseup", handleMouseUp);
     setIsPlaying(true);
     handleReset();
+    setIsComplete(false);
   };
 
   const getTransformStyleString = () => {
@@ -92,21 +93,21 @@ function App() {
   }
 
   const handleOnComplete = () => {
-
-    console.log("倒计时完成");
+    if (isComplete) { return; }
+    if (isDragging) { return; }
     setIsComplete(true);
 
     if (Notification.permission === 'granted') {
       // 如果通知权限已授予
-      new Notification('系统通知', {
-        body: '倒计时完成！'
+      new Notification("It's a timer", {
+        body: 'Countdown completed！'
       });
     } else if (Notification.permission !== 'denied') {
       // 如果通知权限尚未确定
       Notification.requestPermission().then(permission => {
         if (permission === 'granted') {
-          new Notification('系统通知', {
-            body: '倒计时完成！'
+          new Notification("It's a timer", {
+            body: 'Countdown completed！'
           });
         }
       });
