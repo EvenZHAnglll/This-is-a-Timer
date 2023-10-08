@@ -19,6 +19,9 @@
       },
       "notification": {
         "all": true
+      },
+      "window": {
+        "setAlwaysOnTop": true
       }
     },
     "bundle": {

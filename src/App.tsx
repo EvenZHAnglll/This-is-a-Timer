@@ -4,6 +4,7 @@ import { CountdownCircleTimer } from 'react-countdown-circle-timer';
 // Documentation of react-countdown-circle-timer 
 // https://github.com/vydimitrov/react-countdown-circle-timer/tree/master/packages/web#react-countdown-circle-timer
 
+import { appWindow } from '@tauri-apps/api/window';
 
 import "./App.css";
 //import glassesLogo from "./assets/Glasses.svg";
@@ -33,6 +34,7 @@ function getTargetDivPosition(): Vector2 | null {
 
 
 function App() {
+
 
   const [reset, setReset] = useState(false);
   const [remainingTimeState, setRemainingTimeState] = useState(0);
@@ -78,6 +80,7 @@ function App() {
     setIsPlaying(true);
     handleReset();
     setIsComplete(false);
+    appWindow.setAlwaysOnTop(false);
   };
 
   const getTransformStyleString = () => {
@@ -96,7 +99,7 @@ function App() {
     if (isComplete) { return; }
     if (isDragging) { return; }
     setIsComplete(true);
-
+    appWindow.setAlwaysOnTop(true);
     if (Notification.permission === 'granted') {
       // 如果通知权限已授予
       new Notification("It's a timer", {
