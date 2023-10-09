@@ -1,52 +1,190 @@
 import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import { invoke } from "@tauri-apps/api/tauri";
+// import { invoke } from "@tauri-apps/api/tauri";
+import { CountdownCircleTimer } from 'react-countdown-circle-timer';
+// Documentation of react-countdown-circle-timer 
+// https://github.com/vydimitrov/react-countdown-circle-timer/tree/master/packages/web#react-countdown-circle-timer
+
+import { appWindow } from '@tauri-apps/api/window';
+
 import "./App.css";
+//import glassesLogo from "./assets/Glasses.svg";
+
+interface Vector2 {
+  x: number;
+  y: number;
+};
+
+let targetDivPosition: Vector2 | null = null;
+
+function getTargetDivPosition(): Vector2 | null {
+  if (targetDivPosition === null) {
+    const targetDivElement = document.getElementById("rotater");
+    if (!targetDivElement) { return null; }
+    const targetDiv = targetDivElement.getBoundingClientRect();
+    if (targetDiv === null) { return null; }
+    targetDivPosition = {
+      x: targetDiv.left + targetDiv.width / 2,
+      y: targetDiv.top + targetDiv.height / 2
+    }
+    return targetDivPosition;
+  } else {
+    return targetDivPosition;
+  }
+};
+
 
 function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-    setGreetMsg(await invoke("greet", { name }));
+
+  const [reset, setReset] = useState(false);
+  const [remainingTimeState, setRemainingTimeState] = useState(0);
+  const [duration] = useState(60 * 60);
+  const [initialRemainingTime, setInitialRemainingTime] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isComplete, setIsComplete] = useState(true);
+
+  const handleReset = () => {
+    setReset(true);
+    console.log("reset the timer.")
+    setTimeout(() => {
+      setReset(false);
+    }, 20);
+  };
+
+  const handleMouseDown = (event: any) => {
+    event.preventDefault();
+    setIsDragging(true);
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+    setIsPlaying(false);
+  };
+
+  const handleMouseMove = (event: any) => {
+    const divRectPosition = getTargetDivPosition();
+    if (divRectPosition === null) { return; }
+    const x = event.clientX - divRectPosition.x;
+    const y = event.clientY - divRectPosition.y;
+    const MouseAngle = Math.atan2(x, y);
+    const targetTime = ((-30 / Math.PI) * MouseAngle + 30) * 60;// 这个60要换成 duration
+    setInitialRemainingTime(targetTime);
+    handleReset();
+    console.log(targetTime);
+  };
+
+  const handleMouseUp = (event: any) => {
+    event.preventDefault();
+    setIsDragging(false);
+    document.removeEventListener("mousemove", handleMouseMove);
+    document.removeEventListener("mouseup", handleMouseUp);
+    setIsPlaying(true);
+    handleReset();
+    setIsComplete(false);
+    appWindow.setAlwaysOnTop(false);
+  };
+
+  const getTransformStyleString = () => {
+    const progress = (remainingTimeState - 1) / duration;
+    const angle = Math.max(0, progress) * 360;
+    const newTranslate = `rotate(${angle}deg)`;
+    return newTranslate;
+  }
+
+  const getHandColor = () => {
+    // return "#6e6050"
+    return "#6e705f";
+  }
+
+  const handleOnComplete = () => {
+    if (isComplete) { return; }
+    if (isDragging) { return; }
+    setIsComplete(true);
+    appWindow.setAlwaysOnTop(true);
+
+    // push notification
+    if (Notification.permission === 'granted') {
+      new Notification("It's a timer", {
+        body: 'Countdown completed！'
+      });
+    } else if (Notification.permission !== 'denied') {
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          new Notification("It's a timer", {
+            body: 'Countdown completed！'
+          });
+        }
+      });
+    }
+  }
+
+  const handleOnUpdate = (remainingTimeOnUpdate: number) => {
+    setIsComplete(false);
+    setRemainingTimeState(remainingTimeOnUpdate);
   }
 
   return (
     <div className="container">
-      <h1>Welcome to Tauri!</h1>
+      <h1>
+        It's a Timer.
+      </h1>
 
-      <div className="row">
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <div className="App">
+        <CountdownCircleTimer
+          key={reset.toString()} // 重要：当 reset 状态变化时，通过改变 key 来重置倒计时圆盘
+          isPlaying={isPlaying}
+          duration={duration}
+          initialRemainingTime={initialRemainingTime}
+          size={240}
+          strokeWidth={90}
+          trailStrokeWidth={120}
+          strokeLinecap={"butt"}
+          rotation={"counterclockwise"}
+          colors={"#6e805f"}
+          onComplete={handleOnComplete}
+          onUpdate={handleOnUpdate}
+        >
+          {() => {
+            return (
+              <div id="rotater"
+                style={{
+                  transform: getTransformStyleString(),
+                  transition: "transform 1s linear",
+                }}>
+                <div id="dot"
+                  style={{
+                    position: "relative",
+                    width: "10px",
+                    height: "25px",
+                    bottom: "100px",
+                    borderRadius: "10px 10px 3px 3px",
+                    background: getHandColor(),
+                  }}
+                  onMouseDown={handleMouseDown}
+                >
+                  <div id="hand"
+                    style={{
+                      position: "relative",
+                      width: "4px",
+                      height: "105px",
+                      left: "3px",
+                      borderRadius: "5px",
+                      background: getHandColor(),
+                    }}
+                  />
+                </div>
+              </div>
+            )
+          }}
+        </CountdownCircleTimer>
+      </div >
+
+      <div style={{ paddingTop: "30px" }}>
+        <div style={{ fontSize: "24px", fontWeight: "bold" }}>
+          {Math.floor(remainingTimeState / 60)}:{remainingTimeState % 60 < 10 ? `0${remainingTimeState % 60}` : remainingTimeState % 60}
+        </div>
       </div>
 
-      <p>Click on the Tauri, Vite, and React logos to learn more.</p>
-
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-
-      <p>{greetMsg}</p>
-    </div>
+    </div >
   );
 }
 
