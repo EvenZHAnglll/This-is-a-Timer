@@ -100,13 +100,13 @@ function App() {
     if (isDragging) { return; }
     setIsComplete(true);
     appWindow.setAlwaysOnTop(true);
+
+    // push notification
     if (Notification.permission === 'granted') {
-      // 如果通知权限已授予
       new Notification("It's a timer", {
         body: 'Countdown completed！'
       });
     } else if (Notification.permission !== 'denied') {
-      // 如果通知权限尚未确定
       Notification.requestPermission().then(permission => {
         if (permission === 'granted') {
           new Notification("It's a timer", {
@@ -127,7 +127,6 @@ function App() {
       <h1>
         It's a Timer.
       </h1>
-
 
       <div className="App">
         <CountdownCircleTimer
